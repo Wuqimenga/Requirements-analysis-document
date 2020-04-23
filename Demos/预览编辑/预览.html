@@ -1,0 +1,54 @@
+<!-- import Vue 2.5-->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<!-- import elementui -->
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+
+<div id="show">
+    {{formData}} 
+    <el-form ref="rulesForm2">
+    <div id="show">
+        <h1>{{formData.title}}</h1>
+
+        <div v-for="(question,i_q) in formData.questions">
+            <div v-if="question.show">
+                <p>{{question.must==true?"*":""}} {{i_q+1}} . {{question.title}}[{{question.type==0?"单选":(question.type==1?"多选":"填空")}}]</p>
+                <!-- 单选 -->
+                <div v-if="question.type==0">
+                    <p style="color:red">{{singleWaring(question)}}</p>
+                    <el-radio-group v-model="question.ans" @change="rela(i_q)">
+                        <div v-for="(option,i_o) in question.options">
+                            <el-radio :label="i_o" >
+                                {{option.content}} 
+                            </el-radio>
+                        </div>
+                    </el-radio-group>
+                </div>
+                <!-- 多选 -->
+                <div v-if="question.type==1">
+                    <p style="color:red" >{{multWaring(question)}}</p>
+                    <el-checkbox-group v-model="question.ans">
+                        <div v-for="(option,i_o) in question.options">
+                            <el-checkbox :label="i_o">
+                                {{option.content}}
+                            </el-checkbox>
+                        </div>
+                    </el-checkbox-group>
+                </div>
+                <!-- 填空 -->
+                <div v-if="question.type==2">
+                    <el-form-item>
+                        <p style="color:red" >{{blankWarning(question)}}</p>
+                        <el-input v-model="question.content" />
+                    </el-form-item>
+                </div>
+            </div>
+        </div>
+        <el-button @click="onSubmit()">提 交</el-button>
+    </div>
+    </el-form>
+</div>
+
+<script src="预览.js"></script>
