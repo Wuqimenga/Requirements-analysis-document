@@ -1,0 +1,112 @@
+<!-- import Vue 2.5-->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.min.js"></script>
+
+<!-- import elementui -->
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<div id="app">
+    <h3>formData:</h3>
+    {{formData}}
+    <el-form ref="rulesForm1" :rules="rules" :model="formData">
+        <el-form-item prop="title">
+            <el-input v-model="formData.title" placeholder="请填写问卷标题"/>
+        </el-form-item>
+
+        <el-button>预览</el-button>
+        <el-button @click="onSubmit(formData)">保存问卷</el-button>
+        <el-button @click="add_question(0)">添加单选</el-button>
+        <el-button @click="add_question(1)">添加多选</el-button>
+        <el-button @click="add_question(2)">添加填空题</el-button>
+
+        <div v-for='(question,i_q) in formData.questions' style="padding: 20px;border: 1px solid red;">
+            <!-- 题目面板 -->
+            <el-card shadow="hover">
+                <p>{{question.must==true?"*":""}} {{i_q+1}} . {{question.title}} [{{question.type==0?"单选题":(question.type==1?"多选题":"填空题")}}]</p>
+                <div v-for='(option,i_o) in question.options'>
+                    <el-radio :label="option.content"></el-radio>
+                </div>
+
+                <!-- 这只是个没有用的输入框，用来演示的 -->
+                <div v-if="question.type==2">
+                    <el-form-item>
+                        <el-input  :disabled="true" placeholder="填空内容" />
+                    </el-form-item>
+                </div>
+
+                <a @click="show_edit_panel(i_q)">{{question.show?"隐藏":"编辑"}}</a>
+                <a @click="del_question(i_q)">删除</a>
+                <a @click="question_moveUp(i_q)">上移</a>
+                <a @click="question_moveDown(i_q)">下移</a>
+                <a @click="question_moveFirst(i_q)">最前</a>
+                <a @click="question_moveLast(i_q)">最后</a>
+            </el-card>
+
+            <!-- 编辑面板 -->
+            <div v-if="question.show">
+                <el-card shadow="hover">
+                    <el-form-item :prop='"questions."+i_q+".title"' :rules="rules.question_title">
+                        <el-input v-model="question.title" placeholder="请填写题目" />
+                    </el-form-item>
+                    <el-switch active-text="必答" v-model="question.must"></el-switch>
+                    <div v-for='(option,i_o) in question.options'>
+                        <el-form-item :prop='"questions."+i_q+".options."+i_o+".content"' :rules="rules.content">
+                            <el-input v-model='option.content' placeholder="请填写选项内容"/>
+                        </el-form-item>
+                        <el-button @click="add_option(i_q,i_o)">添加选项</el-button>
+                        <el-button @click="del_option(i_q,i_o)" :disabled="(question.options.length<2)?true:false">删除选项</el-button>
+                        <el-button @click="option_moveUp(i_q,i_o)">上移</el-button>
+                        <el-button @click="option_moveDown(i_q,i_o)">下移</el-button>
+                    </div>
+                    <!-- 多选题显示编辑限制选项个数组件 -->
+                        <div v-if="question.type==1">
+                            最少选
+                            <el-input-number 
+                                v-model="question.min" 
+                                :min="2" 
+                                :max="question.options.length">
+                            </el-input-number>项
+                            最多选
+                            <el-input-number 
+                                v-model="question.max" 
+                                :min="question.min" 
+                                :max="question.options.length">
+                            </el-input-number>项
+                        </div>
+                    <a @click="show_logic_dialog(i_q)">逻辑设置</a>
+                    <!-- 逻辑设置弹窗 -->
+                    <el-dialog
+                    title="逻辑设置"
+                    :visible.sync="dialogVisible"
+                    width="60%">
+                        <span>当前题目:</span>{{question.title}} i_q={{i_q}}<br>
+                        <span>关联题目:</span>
+                        <el-select v-model="question.rela.question_id" placeholder="请选择">
+                            <el-option
+                                v-for="(rq,ri) in getRelatedQuestions(i_q)"
+                                :value="rq.id"
+                                :label="rq.title">
+                            </el-option>
+                            <!-- v-for 排在本题前面的所有单选题列表 (rq,ri) in getRelatableQuestions(i_q) 根据当前问题的索引找到question -->
+                        </el-select>
+                        <p>可关联选项</p>
+                        <el-checkbox-group 
+                            v-model="question.rela.option_index"
+                            v-for="(ro,ri) in getOptions(question.rela.question_id)">
+                            <!-- v-for 所选题目的所有选项 (ro,ri) in getOptions(question.rela.question_id) -->
+                            <el-checkbox :label="ri">{{ro.content}}</el-checkbox>
+                        </el-checkbox-group>
+
+                        <!-- 弹窗按钮 -->
+                        <span slot="footer" class="dialog-footer">
+                            <el-button @click="delete_logic(question)">清 除</el-button>
+                            <el-button type="primary" @click="save_logic(question)">确 定</el-button>
+                        </span>
+                    </el-dialog>
+                </el-card>
+            </div>
+        </div>
+    </el-form>
+</div>
+
+<script src="编辑.js"></script>
