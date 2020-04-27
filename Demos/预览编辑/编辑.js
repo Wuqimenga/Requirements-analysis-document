@@ -10,6 +10,7 @@ new Vue({
         return{
             dialogVisible:false,  // 弹窗不显示
             formData:{
+               userId:0,
                 id:0,
                 title:"问卷标题",
                 questions:[]
