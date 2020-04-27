@@ -8,6 +8,7 @@ type:
 
 // 问卷 formData
 {
+    "userId":0,// 用户id
     "id":0,// 问卷编号
     "title":"",// 问卷标题
     "questions":[
