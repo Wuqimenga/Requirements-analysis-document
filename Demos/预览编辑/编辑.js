@@ -11,6 +11,7 @@ new Vue({
             dialogVisible:false,  // 弹窗不显示
             formData:{
                userId:0,
+               isPublish:false,
                 id:0,
                 title:"问卷标题",
                 questions:[]
