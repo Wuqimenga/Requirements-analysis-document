@@ -10,6 +10,7 @@ type:
 {
     "userId":0,// 用户id
     "id":0,// 问卷编号
+    "isPublish":false,// 是否发布
     "title":"",// 问卷标题
     "questions":[
         {
